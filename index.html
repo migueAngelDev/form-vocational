@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Vocacional</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background 0.5s ease-in-out;
+    }
+
+    h1 {
+      margin-top: 2rem;
+      font-size: 2rem;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .quiz-container {
+      background: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      margin: 2rem auto;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      transition: background 0.5s;
+    }
+
+    .question {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .question.active {
+      display: block;
+    }
+
+    .question h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    label:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #eee;
+    }
+
+    #results {
+      display: none;
+      text-align: center;
+    }
+
+    #loadingMessage {
+      display: none;
+      font-size: 1.3rem;
+      margin: 2rem 0;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      font-weight: bold;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    #topCareers {
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+    }
+
+    #topCareers li {
+      background: #ffffff30;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    canvas {
+      margin-top: 2rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #countdown {
+      display: none;
+      font-size: 5rem;
+      font-weight: bold;
+      margin-top: 2rem;
+      text-align: center;
+      color: #fff;
+      animation: zoomIn 0.5s ease-in-out;
+    }
+
+    @keyframes zoomIn {
+      0% {
+        transform: scale(0.5);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Test de Orientación Vocacional</h1>
+  <div class="quiz-container">
+    <form id="quizForm"></form>
+    <div id="loadingMessage">🎯 ¡Estás preparado para descubrir tu carrera vocacional!</div>
+    <div id="countdown"></div>
+    <div id="results">
+      <h2>Resultados</h2>
+      <ol id="topCareers"></ol>
+      <canvas id="careerChart" width="400" height="400"></canvas>
+      <button onclick="restartQuiz()">Reiniciar encuesta</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const backgrounds = {
+      a: '#2196f3', // Pedagogía
+      b: '#4caf50', // Turismo
+      c: '#ff9800', // Comunicación
+      d: '#9c27b0', // Diseño gráfico
+      e: '#3f51b5', // Mercadotecnia
+      f: '#ff5722', // Gastronomía
+      g: '#009688', // Nutrición
+      h: '#607d8b', // Ingeniería
+      i: '#795548'  // Derecho
+    };
+
+    const questions = [
+      {
+        question: "¿Qué te gusta hacer en las vacaciones?",
+        step: 1,
+        answers: [
+          "Jugar con niños pequeños/sobrinos",
+          "Organizar las vacaciones",
+          "Crear contenido para redes sociales",
+          "Aprovechar el tiempo para dibujar",
+          "Buscar una fuente de ingresos",
+          "Preparar postres",
+          "Ponerme a dieta / hacer ejercicio",
+          "Jugar en el celular / consola",
+          "Ver documentales / leer libros"
+        ]
+      },
+      {
+        question: "Si te dieran la oportunidad de entrar a un trabajo con plaza, ¿cuál escogerías?",
+        step: 2,
+        answers: [
+          "Dar clases en una escuela primaria / kínder",
+          "Trabajar en una agencia de viajes",
+          "Conductor en un programa de TV para Telemundo/Telesisa",
+          "Diseñador gráfico en una agencia de marketing internacional",
+          "Ser CEO de una empresa de marketing digital",
+          "Chef de cruceros",
+          "Organización enfocada en educación de comida saludable",
+          "Empresa que desarrolle inteligencia artificial y robótica",
+          "Trabajar en una firma de abogados / despacho jurídico"
+        ]
+      },
+      {
+        question: "Si tuvieras la oportunidad de poner tu propio negocio, ¿de qué sería?",
+        step: 3,
+        answers: [
+          "Centro educativo para regularización primaria/secundaria/bachillerato",
+          "Empresa que ofrezca tours a sitios turísticos locales",
+          "Agencia de contenido audiovisual",
+          "Estudio de diseño creativo que trabaje con Pixar/Dreamworks",
+          "Agencia de publicidad",
+          "Empresa de catering de alimentos y bebidas",
+          "Franquicia de ensaladas / comida vegana",
+          "Empresa de energías renovables / IA / videojuegos",
+          "Despacho de asesoría jurídica"
+        ]
+      },
+      {
+        question: "¿Qué prefieres hacer en tu tiempo libre?",
+        step: 4,
+        answers: [
+          "Hacer manualidades",
+          "Visitar lugares turísticos locales",
+          "Grabar TikToks",
+          "Ver videos para aprender dibujo/pintura",
+          "Crear tendencias en redes sociales",
+          "Tomar clases / cursos de cocina",
+          "Ir al gimnasio",
+          "Jugar videojuegos / experimentar con ChatGPT",
+          "Ver Caso Cerrado"
+        ]
+      },
+      {
+        question: "¿En qué te consideras mejor?",
+        step: 5,
+        answers: [
+          "Enseñar",
+          "Socializar",
+          "Comunicarme con las personas",
+          "Dibujar / Pintar",
+          "Saber negociar",
+          "Preparando postres",
+          "Seguir una dieta",
+          "Programar",
+          "Resolver problemas o conflictos"
+        ]
+      },
+      {
+        question: "¿Qué actividades se te facilitan más?",
+        step: 6,
+        answers: [
+          "Compartir / transmitir conocimiento",
+          "Organizar eventos",
+          "Grabar y editar videos",
+          "Utilizar Photoshop / Illustrator",
+          "Ventas",
+          "Realizar las compras en el súper",
+          "Hacer ejercicio",
+          "Diseñar / crear ideas nuevas de videojuegos",
+          "Participar en debates"
+        ]
+      },
+      {
+        question: "¿Qué consideras que tiene más relevancia para tu futuro?",
+        step: 7,
+        answers: [
+          "Ser director de mi propia institución",
+          "Dominar varios idiomas (políglota)",
+          "Ganar un Pulitzer / Oscar",
+          "Ser un diseñador gráfico famoso",
+          "Ser publicista de la marca Dior",
+          "Ser un chef reconocido de comida internacional",
+          "Tener una franquicia de consultorios nutricionales",
+          "Trabajar para Google / Facebook",
+          "Llegar a ser un juez"
+        ]
+      }
+    ];
+
+
+    const carreers = [
+      {
+        carreer: "Pedagogía",
+        index: "a"
+      },
+      {
+        carreer: "Turismo",
+        index: "b"
+      },
+      {
+        carreer: "Comunicación",
+        index: "c"
+      },
+      {
+        carreer: "Diseño gráfico",
+        index: "d"
+      },
+      {
+        carreer: "Mercadotecnia",
+        index: "e"
+      },
+      {
+        carreer: "Gastronomía",
+        index: "f"
+      },
+      {
+        carreer: "Nutrición",
+        index: "g"
+      },
+      {
+        carreer: "Ingeniería",
+        index: "h"
+      },
+      {
+        carreer: "Derecho",
+        index: "i"
+      },
+    ]
+
+    const quizForm = document.getElementById('quizForm');
+    const resultsSection = document.getElementById('results');
+    const loadingMessage = document.getElementById('loadingMessage');
+    let currentStep = 0;
+    let answers = Array(questions.length).fill([]);
+    let chartInstance = null;
+
+
+    const stepBackgroundMap = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+    function setBackground(step) {
+      const letter = stepBackgroundMap[step];
+      const bg = backgrounds[letter] || '#673ab7';
+      document.body.style.background = bg;
+    }
+
+
+    function renderQuestion(step) {
+      setBackground(step);
+      const q = questions[step];
+      quizForm.innerHTML = `
+        <div class="question active">
+          <h3>${q.step}. ${q.question}</h3>
+          ${q.answers.map((a, i) => `
+            <label>
+              <input type="checkbox" name="step${q.step}" value="${String.fromCharCode(97 + i)}">
+              ${a}
+            </label>
+          `).join('')}
+          <div class="controls">
+            <button type="button" onclick="prevStep()" ${step === 0 ? 'disabled' : ''}>Atrás</button>
+            <button type="button" onclick="nextStep()">${step + 1 === questions.length ? 'Ver Resultados' : 'Siguiente'}</button>
+          </div>
+        </div>`;
+    }
+
+    function nextStep() {
+      const selected = quizForm.querySelectorAll('input[name^="step"]:checked');
+      if (selected.length === 0) return alert("Selecciona al menos una opción para continuar.");
+      answers[currentStep] = Array.from(selected).map(input => input.value);
+      currentStep++;
+      if (currentStep < questions.length) {
+        renderQuestion(currentStep);
+      } else {
+        showLoadingThenResults();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderQuestion(currentStep);
+        const inputs = quizForm.querySelectorAll('input[type="checkbox"]');
+        inputs.forEach(input => {
+          if (answers[currentStep].includes(input.value)) {
+            input.checked = true;
+          }
+        });
+      }
+    }
+
+    function showLoadingThenResults() {
+      quizForm.innerHTML = '';
+      loadingMessage.style.display = 'block';
+      setTimeout(() => {
+        loadingMessage.style.display = 'none';
+        calculateResults();
+      }, 1000);
+    }
+
+    function calculateResults() {
+      const results = {};
+      carreers.forEach(c => results[c.carreer] = 0);
+      answers.flat().forEach(letter => {
+        const match = carreers.find(c => c.index === letter);
+        if (match) results[match.carreer]++;
+      });
+
+      const sorted = Object.entries(results).sort((a, b) => b[1] - a[1]);
+      const topList = document.getElementById('topCareers');
+      topList.innerHTML = '';
+      sorted.slice(0, 3).forEach(([career, score], index) => {
+        topList.innerHTML += `<li><strong>#${index + 1}: ${career}</strong> – ${score} coincidencias</li>`;
+      });
+
+      renderChart(sorted);
+      resultsSection.style.display = 'block';
+    }
+
+    function renderChart(sortedData) {
+      const ctx = document.getElementById('careerChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: sortedData.map(e => e[0]),
+          datasets: [{
+            label: 'Vocación',
+            data: sortedData.map(e => e[1]),
+            fill: true,
+            backgroundColor: 'rgba(255,99,132,0.2)',
+            borderColor: 'rgba(255,99,132,1)',
+            pointBackgroundColor: 'rgba(255,99,132,1)',
+            pointBorderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#fff' } }
+          },
+          scales: {
+            r: {
+              pointLabels: { color: '#fff' },
+              grid: { color: '#aaa' },
+              angleLines: { color: '#ccc' }
+            }
+          }
+        }
+      });
+    }
+
+    function restartQuiz() {
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+      currentStep = 0;
+      answers = Array(questions.length).fill([]);
+      resultsSection.style.display = 'none';
+      renderQuestion(currentStep);
+    }
+
+    function showLoadingThenResults() {
+      quizForm.innerHTML = '';
+      loadingMessage.style.display = 'block';
+
+      const countdownEl = document.getElementById('countdown');
+      countdownEl.style.display = 'block';
+
+      let counter = 3;
+      countdownEl.textContent = counter;
+
+      const interval = setInterval(() => {
+        counter--;
+        if (counter === 0) {
+          clearInterval(interval);
+          loadingMessage.style.display = 'none';
+          countdownEl.style.display = 'none';
+          calculateResults();
+        } else {
+          countdownEl.textContent = counter;
+          countdownEl.classList.remove('zoom');
+          void countdownEl.offsetWidth; // Re-trigger animation
+          countdownEl.classList.add('zoom');
+        }
+      }, 1000);
+    }
+
+
+
+    renderQuestion(currentStep);
+  </script>
+</body>
+
+</html>
