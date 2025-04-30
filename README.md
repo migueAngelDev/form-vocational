@@ -30,5 +30,7 @@ Este proyecto es una aplicación web en HTML, CSS y JavaScript puro que guía a 
 ```plaintext
 📁 Proyecto
 │
-├── index.html          # Página principal con estructura, lógica y estilos
+├── index.html          # Página principal con estructura
+├── styles.css          # Archivo con los estilos que dan vida a la UI
+├── script.js           # Archivo con toda la lógica del formulario
 ├── README.md           # Este archivo
