@@ -12,22 +12,42 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Test de Orientación Vocacional</h1>
+  <header class="header">
+    <div class="logo-container"><img src="images-removebg-preview.png" alt="Logo Istmo Americana" class="logo" /></div>
+     <h1 >Test de Orientación Vocacional</h1>
+ </header>
+
   <div class="quiz-container">
+    <!-- 1. Pantalla de introducción mejorada -->
+    <div id="previewScreen" class="preview active">
+      <h2 >🎓 ¿Cómo funciona?</h2>
+      <p >Selecciona todas las opciones que sientas te representan en cada pregunta.</p>
+      <p  >Al finalizar, descubrirás la carrera que mejor se adapta a tus gustos y habilidades.</p>
+      <button id="startBtn">¡Empecemos!</button>
+    </div>
+
+    <!-- 2. Barra de progreso -->
     <div id="progressBarContainer">
       <div id="progressBar"></div>
     </div>
 
+    <!-- 3. Formulario dinámico -->
     <form id="quizForm"></form>
 
-    <div id="loadingMessage">🎯 ¡Estás preparado para descubrir tu carrera vocacional!</div>
+    <!-- 4. Mensajes y cuenta regresiva -->
+    <div id="loadingMessage">🎯 ¡Prepárate para descubrir tu vocación!</div>
     <div id="countdown"></div>
 
+    <!-- 5. Resultados -->
     <div id="results">
-      <h2>🎉 ¡Esto es lo que mejor va contigo!</h2>
+      <div id="finalMessage" class="final-message"></div>
+      <h2>🏆 Resultados</h2>
       <ol id="topCareers"></ol>
-      <canvas id="careerChart" width="400" height="400"></canvas>
-      <button onclick="restartQuiz()">Quiero volver a intentarlo</button>
+      <canvas id="careerChart" width="400" height="300"></canvas>
+      <div class="result-buttons">
+        <button id="shareBtn">🔗 Compartir con amigos</button>
+        <button onclick="restartQuiz()">Quiero volver a intentarlo</button>
+      </div>
     </div>
   </div>
 
